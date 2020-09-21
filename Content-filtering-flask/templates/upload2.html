@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% block head %}
+    <title>Content filtering - Demo</title>
+    {% block stylesheets %}
+    <!-- Bootstrap -->
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}"
+          rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="{{ url_for('static', filename='css/knockout-file-bindings.css') }}"
+          rel="stylesheet">
+    {% endblock stylesheets %}
+    <style type="text/css">
+        .container {
+            max-width: 750px;
+            padding: 15px;
+        }
+    </style>
+    {% endblock head %}
+</head>
+<body>
+{% block body %}
+<div class="container">
+    <h3>
+        Upload your file -- (Maximum image size allowed is 512kb)
+    </h3>
+    <div class="well" data-bind="fileDrag: fileData">
+        <div class="form-group row">
+            <div class="col-md-6">
+                <img style="height: 125px;" class="img-rounded  thumb"
+                     data-bind="attr: { src: fileData().dataURL }, visible: fileData().dataURL">
+                <div data-bind="ifnot: fileData().dataURL">
+                    <label class="drag-label">Drag file here</label>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <form action="http://192.168.1.6:5000/uploader" method="POST"
+                      enctype="multipart/form-data">
+                    <input type="file" name="file" data-bind="fileInput: fileData, customFileInput: {
+	              buttonClass: 'btn btn-success',
+	              fileNameClass: 'disabled form-control',
+	              onClear: onClear,
+	              onInvalidFileDrop: onInvalidFileDrop
+	            }" accept="image/*">
+                    <input type="submit"/>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% block javascripts %}
+<script src="{{ url_for('static', filename='js/knockout-min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/knockout-file-bindings.js') }}"></script>
+<script>
+    var viewModel = {};
+    viewModel.fileData = ko.observable({
+        dataURL: ko.observable(),
+        // can add "fileTypes" observable here, and it will override the "accept" attribute on the file input
+        // fileTypes: ko.observable('.xlsx,image/png,audio/*')
+    });
+    viewModel.multiFileData = ko.observable({dataURLArray: ko.observableArray()});
+    viewModel.onClear = function (fileData) {
+        if (confirm('Are you sure?')) {
+            fileData.clear && fileData.clear();
+        }
+    };
+    viewModel.debug = function () {
+        window.viewModel = viewModel;
+        console.log(ko.toJSON(viewModel));
+        debugger;
+    };
+    viewModel.onInvalidFileDrop = function (failedFiles) {
+        var fileNames = [];
+        for (var i = 0; i < failedFiles.length; i++) {
+            fileNames.push(failedFiles[i].name);
+        }
+        var message = 'Invalid file type: ' + fileNames.join(', ');
+        alert(message)
+        console.error(message);
+    };
+    ko.applyBindings(viewModel);
+</script>
+{% endblock javascripts %}
+{% endblock body %}
+</body>
+</html>

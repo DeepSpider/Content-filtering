@@ -1,0 +1,55 @@
+https://github.com/EBazarov/nsfw_data_source_urls
+
+
+data
+├── test
+│   ├── negative
+│   └── positive
+└── train
+    ├── negative
+    └── positive
+
+
+find . -name "*.jpg" -type 'f' -size -22k -delete
+
+i=1
+cd /home/rik/apps/youtube/nsfw-classifier-demo/data/train/positive/
+files=`ls`
+for file in $files; do
+mv $file /home/rik/apps/youtube/nsfw-classifier-demo/data/test/positive/
+i=`expr $i + 1`
+if [[ $i = 9400 ]]; then
+     break
+fi
+done
+
+dload https://www.crcv.ucf.edu/data/Selfie/Selfie-dataset.tar.gz
+
+i=1
+cd /home/rik/apps/youtube/nsfw-classifier-demo/data/train/negative/
+files=`ls`
+for file in $files; do
+mv $file /home/rik/apps/youtube/nsfw-classifier-demo/data/test/negative/
+i=`expr $i + 1`
+if [[ $i = 9400 ]]; then
+     break
+fi
+done
+
+
+find . -type d -print0 | while read -d '' -r dir; do
+    files=("$dir"/*)
+    printf "%5d files in directory %s\n" "${#files[@]}" "$dir"
+done
+
+du -a | cut -d/ -f2 | sort | uniq -c | sort -nr
+
+tar -zcvf nsfw-classifier-demo.tar.gz nsfw-classifier-demo/
+
+
+https://www.tensorflow.org/guide/keras/train_and_evaluate
+
+
+tensorboard --logdir logs
+
+http://192.168.1.6:5000/upload
